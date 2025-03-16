@@ -2,16 +2,22 @@
 
 A text search CLI tool in Rust
 
+## Installation
+
+```bash
+cargo install --path .
+```
+
 ## Usage
 
 + case sensitive
 
 ```bash
-cargo run -- body tests/test.txt
+minigrep body tests/test.txt
 ```
 
 + case insensitive
 
 ```bash
-IGNORE_CASE=true cargo run -- body tests/test.txt
+IGNORE_CASE=true minigrep body tests/test.txt
 ```

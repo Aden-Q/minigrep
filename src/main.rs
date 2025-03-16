@@ -13,10 +13,6 @@ fn main() {
         process::exit(1);
     });
 
-    // debug only
-    println!("Searching for {}", config.pattern);
-    println!("In file {}", config.filepath);
-
     if let Err(err) = minigrep::run(config) {
         eprintln!("Application error: {err}");
         process::exit(1);

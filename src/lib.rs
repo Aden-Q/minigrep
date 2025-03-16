@@ -18,13 +18,20 @@ impl Config {
     }
 
     // parse config from arguments
-    pub fn parse_config(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn parse_config(
+        mut args: Box<dyn Iterator<Item = String>>,
+    ) -> Result<Config, &'static str> {
+        args.next();
 
-        let pattern: String = args[1].clone();
-        let filepath: String = args[2].clone();
+        let pattern: String = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing pattern"),
+        };
+
+        let filepath: String = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing filepath"),
+        };
 
         let ignore_case = env::var("IGNORE_CASE").is_ok();
 
@@ -36,8 +43,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents: String = fs::read_to_string(config.filepath)?;
 
     let result: Vec<&str> = match config.ignore_case {
-        true => search(&config.pattern, &contents),
-        false => search_case_insensitive(&config.pattern, &contents),
+        false => search(&config.pattern, &contents),
+        true => search_case_insensitive(&config.pattern, &contents),
     };
 
     for line in result {
@@ -48,28 +55,20 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search<'a>(pattern: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut res = Vec::new();
-
-    for line in contents.lines() {
-        if line.contains(pattern) {
-            res.push(line);
-        }
-    }
-
-    res
+    contents
+        .lines()
+        .filter(|line: &&str| line.contains(pattern))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(pattern: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut res = Vec::new();
-    let pattern: &str = &pattern.to_lowercase();
-
-    for line in contents.lines() {
-        if line.to_lowercase().contains(pattern) {
-            res.push(line);
-        }
-    }
-
-    res
+    contents
+        .lines()
+        .map(|line: &str| line.to_lowercase())
+        .enumerate()
+        .filter(|(_, line)| line.contains(&pattern.to_lowercase()))
+        .map(|(i, _)| contents.lines().nth(i).unwrap())
+        .collect()
 }
 
 #[cfg(test)]

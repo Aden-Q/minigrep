@@ -10,13 +10,13 @@ cargo install --path .
 
 ## Usage
 
-+ case sensitive
++ case sensitive mode
 
 ```bash
 minigrep body tests/test.txt
 ```
 
-+ case insensitive
++ case insensitive mode
 
 ```bash
 IGNORE_CASE=true minigrep body tests/test.txt
